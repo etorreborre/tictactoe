@@ -5,7 +5,7 @@ import org.specs2.specification.{Group, Grouped}
 import org.scalacheck._
 import org.specs2.matcher.Matcher
 import org.scalacheck.Prop.forAll
-import Coordinates.{Top, Bottom, Center, Left, Middle, Right}
+import Coordinates.{Top, Bottom, Left, Middle, Right}
 
 class TicTacToeSpec extends Specification with Boards { def is =
 
@@ -113,7 +113,7 @@ trait Boards extends ScalaCheck { this: Specification =>
 
 object Coordinates extends Enumeration {
   type Coordinate = Value
-  val Top, Center, Bottom, Left, Middle, Right = Value
+  val Top, Bottom, Left, Middle, Right = Value
 }
 
 case class Line(moves: String*) {
