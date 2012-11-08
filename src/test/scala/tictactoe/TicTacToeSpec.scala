@@ -62,6 +62,11 @@ trait Boards extends ScalaCheck { this: Specification =>
 
   def boards        = Gen.oneOf(emptyBoards, winningBoards)
   def emptyBoards   = Gen.value(Board.empty)
+
+  /**
+   * winning boards are created by interspersing a winning sequence of moves (a "line") with an arbitrary sequence.
+   * This is not all winning boards though
+   */
   def winningBoards = for {
     player1Moves  <- winningSeq
     player2Moves  <- movesSeq(3, 3)
