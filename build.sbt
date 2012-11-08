@@ -17,7 +17,8 @@ resolvers ++= Seq("releases" at "http://oss.sonatype.org/content/repositories/re
                   "snapshots" at "http://oss.sonatype.org/content/repositories/snapshots")
 
 libraryDependencies ++= Seq("org.specs2" %% "specs2" % "1.12.3-SNAPSHOT",
-                            "org.scalacheck" %% "scalacheck" % "1.9")
+                            "org.scalacheck" %% "scalacheck" % "1.9",
+                            "org.scalaz" %% "scalaz-core"% "7.0.0-M3")
 
 logBuffered := false
 
