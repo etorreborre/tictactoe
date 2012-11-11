@@ -22,6 +22,7 @@ import Board._
  */
 class TicTacToeSpec extends Specification with Boards { def is =
 
+  "WITH TDD"         ^p^
   playerMoves(tdd)   ^
   "WITH SCALACHECK"  ^p^
   playerMoves(pdd)
