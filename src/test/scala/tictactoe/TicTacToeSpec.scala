@@ -7,6 +7,7 @@ import XCoordinates.{Left, Middlex, Right}
 import YCoordinates.{Top, Bottom, Middley}
 import Players._
 import Board._
+import Move._
 
 /**
  * ====================

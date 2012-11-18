@@ -24,27 +24,32 @@ trait Boards extends ScalaCheck { this: Specification =>
 
   /**
    * winning boards are created by interspersing a winning sequence of moves (a "line") with an arbitrary sequence.
-   * This is not all winning boards though and the board might not even be valid!
+   * This is not all winning boards though, just the ones where a player wins with a minimum number of moves
    */
-  def winningBoards = Gen.oneOf(player1WinsBoards, player2WinsBoards)
+  def winningBoards = Gen.oneOf(player1WinsBoards, player2WinsBoards).flatMap(b => symmetries(b))
+
+  /** generator for all the possible symmetries of a board */
+  def symmetries = (b: Board) => Gen.oneOf(Symmetry.symmetries.map(b.transform))
 
   /** boards where player1 wins */
   def player1WinsBoards: Gen[Board] = for {
-    player1Moves  <- winningSeq
-    player2Moves  <- moveSeqs(3, 3)
-  } yield Board(player1Moves.zip(player2Moves).flatMap { case (p1, p2) => Seq(p1, p2) }.dropRight(1):_*)
+    // a winning line for player 1
+    player1Moves  <- winningSeqs
+    // 2 moves for player 2, which can't be the same as the ones for player1
+    player2Moves  <- moveSeqs(2, 2).filter(mvs => !mvs.exists(player1Moves.contains))
+  } yield Board(zipIn(player1Moves, player2Moves):_*)
 
   /** boards where player2 wins */
   def player2WinsBoards: Gen[Board] = for {
-    player1Moves  <- moveSeqs(3, 3).filter(mvs => !Board.isWinning(mvs))
-    player2Moves  <- winningSeq
-  } yield Board(player1Moves.zip(player2Moves).flatMap { case (p1, p2) => Seq(p1, p2) }:_*)
+    player2Moves  <- winningSeqs
+    player1Moves  <- moveSeqs(3, 3).filter(mvs => !mvs.exists(player2Moves.contains) && !Board.isWinning(mvs))
+  } yield Board(zipIn(player1Moves, player2Moves):_*)
 
-  /** any sequence of 3 moves making a winning line */
-  def winningSeq = Gen.choose(0, 7).map(Board.winningMoves)
+  /** minimum sequences of 3 moves making a winning line, the rest being computable by a symmetry */
+  def winningSeqs: Gen[Seq[Move]] = Gen.oneOf(Board.minimumWinLines)
 
   /** any random move */
-  def moves = Gen.oneOf(allMoves)
+  def moves = Gen.oneOf(Move.allMoves)
 
   /** any possible sequence of moves of an arbitrary size */
   def moveSeqs(min: Int = 0, max: Int = 9) =
@@ -55,4 +60,14 @@ trait Boards extends ScalaCheck { this: Specification =>
     def ap[A, B](fa: => Gen[A])(f: => Gen[(A) => B]) = fa.map2(f)((v, function) => function(v))
     def map[A, B](fa: Gen[A])(f: (A) => B) = fa map f
   }
+
+  /**
+   * intercalate the elements of a list with another
+   *
+   * If the second list has less elements, add dummy elements to make sure that it's possible to intercalate a list with
+   * n - 1 elements into a list with n elements
+   */
+  def zipIn[T](seq1: Seq[T], seq2: Seq[T]) =
+    if (seq2.size < seq1.size) seq1.zip(seq2 :+ (null.asInstanceOf[T])).flatMap { case (x, y) => Seq(x, y) }.dropRight(1)
+    else                       seq1.zip(seq2).flatMap { case (x, y) => Seq(x, y) }
 }
